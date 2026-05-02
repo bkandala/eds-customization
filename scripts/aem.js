@@ -524,6 +524,21 @@ function buildBlock(blockName, content) {
 }
 
 /**
+ * Block registry mapping block names to their folder paths
+ */
+const BLOCK_REGISTRY = {
+  // Common blocks
+  'breadcrumb': 'common',
+  'footer': 'common',
+  'fragment': 'common',
+  'header': 'common',
+  // Team-a blocks
+  'cards': 'team-a',
+  'columns': 'team-a',
+  'hero': 'team-a',
+};
+
+/**
  * Loads JS and CSS for a block.
  * @param {Element} block The block element
  */
@@ -533,12 +548,16 @@ async function loadBlock(block) {
     block.dataset.blockStatus = 'loading';
     const { blockName } = block.dataset;
     try {
-      const cssLoaded = loadCSS(`${window.hlx.codeBasePath}/blocks/${blockName}/${blockName}.css`);
+      // Determine the block folder from the registry
+      const blockFolder = BLOCK_REGISTRY[blockName] || 'common';
+      const blockPath = `${window.hlx.codeBasePath}/blocks/${blockFolder}/${blockName}`;
+      
+      const cssLoaded = loadCSS(`${blockPath}/${blockName}.css`);
       const decorationComplete = new Promise((resolve) => {
         (async () => {
           try {
             const mod = await import(
-              `${window.hlx.codeBasePath}/blocks/${blockName}/${blockName}.js`
+              `${blockPath}/${blockName}.js`
             );
             if (mod.default) {
               await mod.default(block);
